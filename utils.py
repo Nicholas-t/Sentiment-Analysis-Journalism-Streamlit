@@ -39,9 +39,10 @@ def get_link_content(link):
     soup = BeautifulSoup(raw_html, features="lxml")
     return soup.select_one("body").getText()
 
-def get_sentiment(negative_sentiment, positive_sentiment, topic, article_content, max_attempt=60, sleep_in_between=2):
-    #time.sleep(1)
-    #return random.randint(0,50)/10
+def get_sentiment(negative_sentiment, positive_sentiment, topic, article_content, max_attempt=60, sleep_in_between=2, override=2.5):
+    time.sleep(1)
+
+    return random.gauss(override,1)
     client = OpenAI(api_key=OPENAI_API_KEY)
     if "thread_id" not in st.session_state:
         thread = client.beta.threads.create()

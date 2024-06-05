@@ -4,7 +4,7 @@ from utils import get_sentiment, get_serp_result, get_link_content
 
 import numpy as np
 import plotly.figure_factory as ff
-
+import random 
 hide_streamlit_style = """
 <style>
 #MainMenu {visibility: hidden;}
@@ -50,6 +50,23 @@ def log(log, type=None):
 
 SERP_PROGRESS_PROGRESS_WEIGHT = 0.05
 
+data_container = st.empty()
+chart_container = st.empty()
+
+def update_data(df):
+    data_container.empty()
+    with data_container:
+        st.dataframe(df)
+
+def update_chart(scores_data, label):
+    chart_container.empty()
+    with chart_container:
+        # Create distplot with custom bin_size
+        fig = ff.create_distplot(
+                scores_data, label, bin_size=.1)
+        # Plot!
+        st.plotly_chart(fig, use_container_width=True)
+
 if st.button("Get Sentiment"):
     progress_bar = st.progress(0, text="Analyzing .....")
     try:
@@ -67,6 +84,7 @@ if st.button("Get Sentiment"):
         scores_data = []
         if len(news_result) != 0:
             progress_step = (1 - SERP_PROGRESS_PROGRESS_WEIGHT) / len(news_result)
+            rand_override = random.uniform(0, 5)# TOREMOVE
             for i, news in enumerate(news_result):
                 news_score_data = []
                 content = get_link_content(news["link"])
@@ -79,19 +97,17 @@ if st.button("Get Sentiment"):
                     for sentiment in sentiments:
                         negative_sentiment = sentiment[0]
                         postive_sentiment = sentiment[1]
-                        sentiment_score = get_sentiment(negative_sentiment, postive_sentiment, topic_input, content)
+                        sentiment_score = get_sentiment(negative_sentiment, postive_sentiment, topic_input, content, rand_override)
                         log("Received score : {} for ({} --- {})".format(sentiment_score, negative_sentiment, postive_sentiment))
                         news_score_data += [float(sentiment_score)]
                     progress_bar.progress(SERP_PROGRESS_PROGRESS_WEIGHT + progress_step * (i + 1), text="Done ({} / {})".format(i+1, len(news_result)))
                     scores_data += [news_score_data]
+                    if len(scores_data)>1:
+                        update_chart(np.array(scores_data).T,  ["{} --- {}".format(sent[0], sent[1]) for sent in sentiments])
+                    
             log("All news article analyzed")
             progress_bar.empty()
-            scores_data = np.array(scores_data).T
-            # Create distplot with custom bin_size
-            fig = ff.create_distplot(
-                    scores_data, ["{} --- {}".format(sent[0], sent[1]) for sent in sentiments], bin_size=[.1, .1])
-            # Plot!
-            st.plotly_chart(fig, use_container_width=True)
+            
     except Exception as e:
         log(e, "error")
 
