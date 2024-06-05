@@ -32,7 +32,7 @@ with st.expander("Advanced Settings"):
 
 period = period[0]
 sentiments = [
-    sentiment_range.split("-") for sentiment_range in sentiments_text.split("\n")
+    sentiment_range.split("-") for sentiment_range in sentiments_text.strip().split("\n")
 ]
 
 logs_container = st.expander("Log", expanded=False)
@@ -76,8 +76,8 @@ if st.button("Get Sentiment"):
         progress_bar.progress(SERP_PROGRESS_PROGRESS_WEIGHT, text="Receive SERP Result")
         news_result = []
         if "news_results" in serp_response:
-            log("Received {} results".format(len(news_result)), "info")
             news_result = serp_response["news_results"]
+            log("Received {} results".format(len(news_result)), "info")
         else:
             log(serp_response)
             log("No result found from SERP", "error")
