@@ -67,7 +67,7 @@ def update_chart(scores_data, label):
         # Plot!
         st.plotly_chart(fig, use_container_width=True)
 
-if st.button("Get Sentiment"):
+if st.button("Get Sentiment", help="This is meant to be uses a proof of concept, the data in here may not be accurate and doesnt reflect the final product"):
     progress_bar = st.progress(0, text="Analyzing .....")
     try:
         log("Calling SERP API....")
